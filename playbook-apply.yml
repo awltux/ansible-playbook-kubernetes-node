@@ -1,0 +1,9 @@
+---
+# {{ playbook_dir }}/playbook-apply.yml 
+- hosts: localhost
+  roles:
+    - { role: ansible-hardening } 
+
+    - { role: ansible-role-docker-ce }
+ 
+

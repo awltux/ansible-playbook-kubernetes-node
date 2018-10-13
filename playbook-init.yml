@@ -1,0 +1,14 @@
+---
+# {{ playbook_dir }}/playbook-init.yml 
+- hosts: localhost
+  roles:
+    - { role: clone-ansible-role-from-git, 
+          git_account: 'openstack', 
+          git_project: 'ansible-hardening', 
+          git_version: '17.0.4' }
+
+    - { role: clone-ansible-role-from-git, 
+          git_account: 'haxorof', 
+          git_project: 'ansible-role-docker-ce', 
+          git_version: '1.8.0' }
+

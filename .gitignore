@@ -1,0 +1,7 @@
+# Ansible retry files
+*.retry
+# screen captures
+hardcopy.*
+# Ansible roles cloned from git
+roles/ansible-hardening
+roles/ansible-role-docker-ce
