@@ -1,0 +1,14 @@
+---
+# Provide overrides for defaults found here:
+#    https://github.com/openstack/ansible-hardening/blob/master/defaults/main.yml
+
+security_rhel7_initialize_aide: yes
+
+security_pwquality_apply_rules: yes
+
+security_pwquality_require_minimum_password_length: yes
+
+security_enable_pwquality_password_set: yes
+
+security_rhel7_concurrent_session_limit: 10
+
