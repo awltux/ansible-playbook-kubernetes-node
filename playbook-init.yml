@@ -12,3 +12,13 @@
           git_project: 'ansible-role-docker-ce', 
           git_version: '1.8.0' }
 
+    - { role: clone-ansible-role-from-git, 
+          git_account: 'vmware', 
+          git_project: 'ansible-role-sudo', 
+          git_version: 'b387a4482b2dac2640a72c512e4f232c95dc166c' }
+
+    - { role: clone-ansible-role-from-git, 
+          git_account: 'geerlingguy', 
+          git_project: 'ansible-role-kubernetes', 
+          git_version: '2.0.0' }
+

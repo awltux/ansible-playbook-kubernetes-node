@@ -1,12 +1,12 @@
 ---
 # {{ playbook_dir }}/roles/clone-ansible-role-from-git/tasks/main.yml
-- name: Clone or pull the ansible hardening repo
+- name: "Clone or pull the {{ git_repo_name }} repo"
   git:
     repo:    '{{ git_repo_url }}'
     dest:    '{{ git_clone_dir }}'
     version: '{{ git_version }}'
 
-- name: 'Assert that git clone of {{ git_clone_project }} role is ignored by playbook clone'
+- name: "Assert that git clone of {{ git_project }} role is ignored by playbook clone"
   lineinfile:
     path: '{{ playbook_dir }}/.gitignore'
     regexp: '^roles/{{ git_project }}$'

@@ -1,0 +1,4 @@
+# configure the current user to be able to sudo without a password. 
+sudo_users:
+  - { userid: '{{ ansible_user_id  }}', group: '{{ ansible_user_id  }}' }
+

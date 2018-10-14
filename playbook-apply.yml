@@ -1,9 +1,12 @@
 ---
 # {{ playbook_dir }}/playbook-apply.yml 
 - hosts: localhost
+  become: true
   roles:
+    - { role: ansible-role-sudo }
     - { role: ansible-hardening } 
-
     - { role: ansible-role-docker-ce }
- 
+    - { role: ansible-role-kubernetes }
+  vars_files:
+    - vars/sudo_users.yml 
 

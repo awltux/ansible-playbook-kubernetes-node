@@ -2,6 +2,10 @@
 *.retry
 # screen captures
 hardcopy.*
+# vi swap files
+*.swp
 # Ansible roles cloned from git
 roles/ansible-hardening
 roles/ansible-role-docker-ce
+roles/ansible-role-sudo
+roles/ansible-role-kubernetes
