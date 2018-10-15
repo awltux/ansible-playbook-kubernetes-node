@@ -6,8 +6,8 @@ hardcopy.*
 *.swp
 *.swo
 # Ansible roles cloned from git
-roles/ansible-hardening
-roles/ansible-role-docker-ce
-roles/ansible-role-sudo
-roles/ansible-role-kubernetes
-roles/symplegma-containerd
+ansible/roles-from-init/ansible-hardening
+ansible/roles-from-init/ansible-role-docker-ce
+ansible/roles-from-init/ansible-role-sudo
+ansible/roles-from-init/ansible-role-kubernetes
+ansible/roles-from-init/symplegma-containerd

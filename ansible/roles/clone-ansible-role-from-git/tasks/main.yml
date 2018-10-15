@@ -9,6 +9,6 @@
 - name: "Assert that git clone of {{ git_project }} role is ignored by playbook clone"
   lineinfile:
     path: '{{ playbook_dir }}/.gitignore'
-    regexp: '^roles/{{ git_project }}$'
-    line: 'roles/{{ git_project }}'
+    regexp: '^roles-from-init/{{ git_project }}$'
+    line: 'roles-from-init/{{ git_project }}'
 
