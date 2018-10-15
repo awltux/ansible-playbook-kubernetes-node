@@ -13,7 +13,7 @@ kubernetes_role: master
 kubernetes_pod_network_cidr: '10.0.2.0/24'
 
 ##### ?
-kubernetes_apiserver_advertise_address: ''
+kubernetes_apiserver_advertise_address: '10.0.2.4'
 
 ##### ?
 kubernetes_version_kubeadm:
