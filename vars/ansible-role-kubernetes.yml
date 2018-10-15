@@ -1,0 +1,24 @@
+---
+
+# Version of Kubernetes to deploy
+# https://github.com/kubernetes/kubernetes/releases
+kubernetes_version: '1.12'
+kubernetes_version_rhel_package: '1.12.1'
+
+# Is this a kubernetes master or node
+kubernetes_role: master
+
+# The underlying network that connects the kubernetes nodes together.
+# All nodes should be able to reach all the other nodes over this network.
+kubernetes_pod_network_cidr: '10.0.2.0/24'
+
+##### ?
+kubernetes_apiserver_advertise_address: ''
+
+##### ?
+kubernetes_version_kubeadm:
+
+kubernetes_kubelet_extra_args: 
+
+kubelet_environment_file_path:
+ 

@@ -4,9 +4,10 @@
   become: true
   roles:
     - { role: ansible-role-sudo }
-    - { role: ansible-hardening } 
-    - { role: ansible-role-docker-ce }
-    - { role: ansible-role-kubernetes }
+    - { role: ansible-hardening }
+    - { role: provide-container-engine } 
+    - { role: provide-container-manager }
+    - { role: provide-container-overlay-network }
   vars_files:
-    - vars/sudo_users.yml 
+    - vars/ansible-role-sudo.yml 
 

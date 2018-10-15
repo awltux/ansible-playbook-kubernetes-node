@@ -1,0 +1,10 @@
+---
+  
+  - include_role: 
+    name: ansible-role-docker-ce,
+    when: container_engine == 'docker'
+
+  - include_role: 
+    name: symplegma-containerd
+    when: container_engine == 'containerd'
+

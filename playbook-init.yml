@@ -13,6 +13,11 @@
           git_version: '1.8.0' }
 
     - { role: clone-ansible-role-from-git, 
+          git_account: 'clusterfrak-dynamics', 
+          git_project: 'symplegma-containerd', 
+          git_version: 'v1.1.0' }
+
+    - { role: clone-ansible-role-from-git, 
           git_account: 'vmware', 
           git_project: 'ansible-role-sudo', 
           git_version: 'b387a4482b2dac2640a72c512e4f232c95dc166c' }

@@ -1,0 +1,7 @@
+---
+
+- include_role: 
+  name: ansible-role-kubernetes
+  when: container_manager == 'kubernetes'
+
+# Could also support swarm
