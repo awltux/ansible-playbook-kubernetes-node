@@ -12,6 +12,7 @@ Vagrant.configure("2") do |config|
 	config.ssh.forward_agent = true
 	check_guest_additions = false
 	functional_vboxsf = false
+        # BOX VERSION FROM HERE: https://app.vagrantup.com/centos/boxes/7
 	config.vm.box = "centos/7"
         config.vm.box_version = "1809.01"
 	hosts.each do |name, ip|
