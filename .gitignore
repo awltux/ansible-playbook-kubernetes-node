@@ -11,3 +11,4 @@ ansible/roles-from-init/ansible-role-docker-ce
 ansible/roles-from-init/ansible-role-sudo
 ansible/roles-from-init/ansible-role-kubernetes
 ansible/roles-from-init/symplegma-containerd
+ansible/roles-from-init/ansible-role-kubernetes-1

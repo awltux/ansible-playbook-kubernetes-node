@@ -6,8 +6,9 @@
     - { role: ansible-role-sudo }
     - { role: ansible-hardening }
     - { role: provide-container-engine } 
-    - { role: provide-container-manager }
-    - { role: provide-container-overlay-network }
+    - { role: provide-container-orchestration }
+    - { role: provide-container-network-overlay }
+    - { role: provide-service-mesh }
   vars_files:
     - vars/ansible-role-sudo.yml 
 
