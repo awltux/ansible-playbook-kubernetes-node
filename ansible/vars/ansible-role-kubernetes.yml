@@ -6,19 +6,21 @@ kubernetes_version: '1.12'
 kubernetes_version_rhel_package: '1.12.1'
 
 # Is this a kubernetes master or node
-kubernetes_role: master
+kubernetes_role: node
 
 # The underlying network that connects the kubernetes nodes together.
 # All nodes should be able to reach all the other nodes over this network.
-kubernetes_pod_network_cidr: '10.0.2.0/24'
+kubernetes_pod_network_cidr: '10.0.3.0/24'
+
+# Change for VBox as this defaults to the IP on default route  
+kubernetes_apiserver_advertise_address: '192.168.77.20'
+
+# kubernetes_kubeadm_init_extra_opts: ''
 
 ##### ?
-kubernetes_apiserver_advertise_address: '10.0.2.4'
+# kubernetes_version_kubeadm:
 
-##### ?
-kubernetes_version_kubeadm:
+# kubernetes_kubelet_extra_args: '--fail-swap-on=false'
 
-kubernetes_kubelet_extra_args: 
-
-kubelet_environment_file_path:
+# kubelet_environment_file_path:
  

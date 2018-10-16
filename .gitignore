@@ -1,3 +1,4 @@
+.vagrant
 # Ansible retry files
 *.retry
 # screen captures

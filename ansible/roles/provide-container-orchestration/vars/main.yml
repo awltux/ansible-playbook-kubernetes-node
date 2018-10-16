@@ -1,3 +1,5 @@
 ---
 
 container_manager: 'kubernetes'
+kubernetes_role: 'none'
+kubernetes_overlay_network: 'cilium'

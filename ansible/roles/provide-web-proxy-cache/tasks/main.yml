@@ -1,0 +1,11 @@
+---
+- name: Start a squid container
+  docker_container:
+    name: squid
+    image: sameersbn/squid:3.5.27
+    state: started
+    restart: yes
+    ports:
+      - "3128:3128"
+    volumes:
+      - "/srv/docker/squid/cache:/var/spool/squid"
