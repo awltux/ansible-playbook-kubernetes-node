@@ -1,6 +1,7 @@
 ---
 # Always ensure latest version of Docker CE
-docker_latest_version: false
+#docker_latest_version: false
 
 # Docker package to install. Latest version verified with Kubernetes
-docker_pkg_name: docker-ce-17.03.3.ce-1.el7
+# trying to work around obsoleted dependencies
+#docker_pkg_name: "docker-ce-17.03.3.ce-1.el7, docker-ce-selinux-17.03.3.ce-1.el7"

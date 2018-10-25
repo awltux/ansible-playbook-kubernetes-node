@@ -7,15 +7,20 @@
 
 nodeCount = 3
 networkBaseAddrString = "192.168.77."
-vboxVersion = "1809.01"
 
-vboxImage = "centos/7"
 devopsBaseAddr = 10
 nodeBaseAddr = 20
 nodeBaseName = "node-"
 devopsBaseName = "devops"
 
 sshKeyName = "vagrant"
+
+# Valid providers are: virtualbox, libvirt, docker
+# libvirt instructions: https://docs.cumulusnetworks.com/display/VX/Vagrant+and+Libvirt+with+KVM+or+QEMU
+vm_provider="virtualbox"
+# NOTE: These will need changed if using other providers 
+vboxImage = "centos/7"
+vboxVersion = "1809.01"
 
 ssh_prv_key = ""
 # User running vagrant has to have keys available
@@ -31,6 +36,11 @@ $setup_hosts = <<-HEREDOC
 #!/bin/bash
 
 set -e
+
+if [[ "$1" == "disable_swap" ]]; then
+  # Kubernetes nodes don't like swap enabled.
+  swapoff -a
+fi
 
 if ! grep -q "devops" /etc/hosts; then
   echo "#{networkBaseAddrString}#{devopsBaseAddr} devops" >> /etc/hosts
@@ -135,18 +145,26 @@ Vagrant.configure("2") do |config|
       	config.vm.define "#{nodeBaseName}#{nodeIndex}" do |machine|
 			machine.vm.network :private_network, ip: "#{networkBaseAddrString}#{nodeBaseAddr + nodeIndex}"
 			machine.vm.hostname = "#{nodeBaseName}#{nodeIndex}"
-			machine.vm.provider "virtualbox" do |vbox|
-				vbox.name = "#{nodeBaseName}#{nodeIndex}"
+			machine.vm.provider "#{vm_provider}" do |provider_vm|
+				provider_vm.name = "#{nodeBaseName}#{nodeIndex}"
+				provider_vm.memory = 4096
+				provider_vm.cpus = 2
 			end
         	machine.vm.provision  "shell", inline: $setup_ssh_keys
-        	machine.vm.provision  "shell", inline: $setup_hosts
+        	machine.vm.provision  "shell" do |bash_shell|
+			  bash_shell.inline = $setup_hosts
+			  # Kubernetes nodes don't like swap enabled.
+			  bash_shell.args = "disable_swap"
+			end
 		end
 	end
 	config.vm.define "#{devopsBaseName}" do |machine|
 		machine.vm.network :private_network, ip: "#{networkBaseAddrString}#{devopsBaseAddr}"
 		machine.vm.hostname = "#{devopsBaseName}"
-		machine.vm.provider "virtualbox" do |vbox|
-			vbox.name = "#{devopsBaseName}"
+		machine.vm.provider "#{vm_provider}" do |provider_vm|
+			provider_vm.name = "#{devopsBaseName}"
+			provider_vm.memory = 4096
+			provider_vm.cpus = 4
 		end
     	machine.vm.provision  "shell", inline: $setup_ssh_keys
        	machine.vm.provision  "shell", inline: $setup_hosts

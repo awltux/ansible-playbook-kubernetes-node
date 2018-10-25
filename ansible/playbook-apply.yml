@@ -1,6 +1,6 @@
 ---
 # {{ playbook_dir }}/playbook-apply.yml 
-- hosts: provisioner:all_nodes
+- hosts: provisioner
   become: true
   roles:
     - { role: ansible-role-sudo }
@@ -11,26 +11,37 @@
     - vars/ansible-hardening.yml 
     - vars/ansible-role-docker-ce.yml 
 
-- hosts: provisioner:all_nodes
+- hosts: all_nodes
   become: true
   roles:
-    - { role: ansible-role-squid }
+    - { role: ansible-role-sudo }
+    - { role: ansible-hardening }
+    - { role: provide-container-engine } 
+  vars_files:
+    - vars/ansible-role-sudo.yml 
+    - vars/ansible-hardening.yml 
+    - vars/ansible-role-docker-ce.yml 
+
+#- hosts: provisioner
+#  become: true
+#  roles:
+#    - { role: provide-web-proxy-cache }
     
 - hosts: master_nodes
   become: true
   roles:
     - role: provide-container-orchestration 
-      kubernetes_role: 'master'
     - role: provide-container-network-overlay 
-      kubernetes_overlay_network: 'cilium'
   vars_files:
     - vars/ansible-role-kubernetes.yml 
+    - group_vars/master_nodes.yml 
 
 - hosts: worker_nodes
   become: true
   roles:
     - role: provide-container-orchestration 
-      kubernetes_role: 'node'
+    - role: provide-container-network-overlay 
   vars_files:
     - vars/ansible-role-kubernetes.yml 
-
+    - group_vars/worker_nodes.yml 
+    

@@ -1,4 +1,10 @@
 ---
+
+- name: Install python docker api
+  package:
+    name: python-docker-py
+    state: present
+
 - name: Start a squid container
   docker_container:
     name: squid
