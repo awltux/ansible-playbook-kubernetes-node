@@ -3,3 +3,4 @@
 container_manager: 'kubernetes'
 kubernetes_role: 'none'
 kubernetes_overlay_network: 'flannel'
+kubernetes_kubelet_extra_args: "--node-ip={{ ansible_host }}"

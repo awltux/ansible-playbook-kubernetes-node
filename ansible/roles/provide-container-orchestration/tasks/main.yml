@@ -1,8 +1,42 @@
 ---
 
-- name: Install and configure Kubernetes
-  include_role: 
-    name: ansible-role-kubernetes
+- name: Configure for Kubernetes container orchestration
   when: container_manager == 'kubernetes'
+  block:
+    - name: Load kernel modules to support IPVS and bridge-netfilter     
+      modprobe: 
+        name: '{{ item }}'
+        state: present
+      with_items:
+        - ip_vs
+        - ip_vs_rr
+        - ip_vs_wrr
+        - ip_vs_sh
+        - br_netfilter
 
-# Could also support swarm
+    - name: "[Support kubeadm.pre-flight-checks]: Persist loading of kernel modules to support IPVS and bridge-netfilter"
+      blockinfile:
+        path: /etc/modules-load.d/kubernetes.conf
+        create: yes
+        content: |
+          ip_vs
+          ip_vs_rr
+          ip_vs_wrr
+          ip_vs_sh
+          br_netfilter
+
+    - name: "[Support kubeadm.pre-flight-checks]: Enable bridge-netfilter calls to ipfilter"
+      sysctl:
+        sysctl_file: /etc/sysctl.d/kubernetes.conf
+        name: '{{ item }}'
+        value: 1
+        reload: yes
+      with_items:
+        - net.bridge.bridge-nf-call-ip6tables
+        - net.bridge.bridge-nf-call-iptables
+        
+    - name: Install and configure Kubernetes
+      include_role: 
+        name: ansible-role-kubernetes
+
+

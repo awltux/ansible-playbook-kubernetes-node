@@ -1,5 +1,7 @@
 ---
 # {{ playbook_dir }}/playbook-apply.yml 
+
+# Should be able to use provisioner:all_nodes, but playbook doesn't load the two different group_vars correctly
 - hosts: provisioner
   become: true
   roles:
@@ -26,7 +28,8 @@
 #  become: true
 #  roles:
 #    - { role: provide-web-proxy-cache }
-    
+
+# Should be able to use master_nodes:worker_nodes, but playbook doesn't load the two different group_vars correctly
 - hosts: master_nodes
   become: true
   roles:
@@ -34,8 +37,7 @@
     - role: provide-container-network-overlay 
   vars_files:
     - vars/ansible-role-kubernetes.yml 
-    - group_vars/master_nodes.yml 
-
+    
 - hosts: worker_nodes
   become: true
   roles:
@@ -43,5 +45,4 @@
     - role: provide-container-network-overlay 
   vars_files:
     - vars/ansible-role-kubernetes.yml 
-    - group_vars/worker_nodes.yml 
-    
+        

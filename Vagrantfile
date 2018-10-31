@@ -5,13 +5,24 @@
 #    - make and make-dep from gnuwin32
 #    - Vagrant 
 
-nodeCount = 3
-networkBaseAddrString = "192.168.77."
+natBaseAddrString = "192.168"
+hostonlyBaseAddrString = "172.28.128"
+vagrantNatAddr = "15"
+routeEth1Path = "/etc/sysconfig/network-scripts/route-eth1"
 
-devopsBaseAddr = 10
-nodeBaseAddr = 20
-nodeBaseName = "node-"
+sshBasePort = 2200
+# One DevOps
+devopsBaseAddr = 9
 devopsBaseName = "devops"
+
+# Up to 7 master_nodes
+masterCount = 1
+masterBaseAddr = 10
+masterBaseName = "master-"
+
+nodeCount = 2
+nodeBaseAddr = 17
+nodeBaseName = "node-"
 
 sshKeyName = "vagrant"
 
@@ -42,13 +53,48 @@ if [[ "$1" == "disable_swap" ]]; then
   swapoff -a
 fi
 
+touch #{routeEth1Path}
+
+routeCount=0
 if ! grep -q "devops" /etc/hosts; then
-  echo "#{networkBaseAddrString}#{devopsBaseAddr} devops" >> /etc/hosts
+  echo "#{natBaseAddrString}.#{devopsBaseAddr}.#{vagrantNatAddr} devops" >> /etc/hosts
+fi
+if ! ip route | grep "#{natBaseAddrString}.#{devopsBaseAddr}.0"; then
+  ip route add #{natBaseAddrString}.#{devopsBaseAddr}.0/24 via #{hostonlyBaseAddrString}.#{devopsBaseAddr} dev eth1
+  cat > #{routeEth1Path} <<INNER_HEREDOC
+ADDRESS${routeCount}=#{natBaseAddrString}.#{devopsBaseAddr}.0
+NETMASK${routeCount}=255.255.255.0
+GATEWAY${routeCount}=#{hostonlyBaseAddrString}.#{devopsBaseAddr}
+INNER_HEREDOC
 fi
 
+routeCount=1
 for index in {0..#{nodeCount - 1}}; do
-  if ! grep -q "node-${index}" /etc/hosts; then
-    echo "#{networkBaseAddrString}$(( #{nodeBaseAddr} + ${index} )) node-${index}" >> /etc/hosts
+  if ! grep -q "#{nodeBaseName}$(( #{nodeBaseAddr} + ${index} ))" /etc/hosts; then
+    echo "#{natBaseAddrString}.$(( #{nodeBaseAddr} + ${index} )).#{vagrantNatAddr} #{nodeBaseName}$(( #{nodeBaseAddr} + ${index} ))" >> /etc/hosts
+  fi
+  if ! ip route | grep "#{natBaseAddrString}.$(( #{nodeBaseAddr} + index )).0"; then
+    ip route add #{natBaseAddrString}.$(( #{nodeBaseAddr} + ${index} )).0/24 via #{hostonlyBaseAddrString}.$(( #{nodeBaseAddr} + ${index} )) dev eth1
+	cat >> #{routeEth1Path} <<INNER_HEREDOC
+ADDRESS$(( routeCount + index ))=#{natBaseAddrString}.$(( #{nodeBaseAddr} + ${index} )).0
+NETMASK$(( routeCount + index ))=255.255.255.0
+GATEWAY$(( routeCount + index ))=#{hostonlyBaseAddrString}.$(( #{nodeBaseAddr} + ${index} ))
+INNER_HEREDOC
+  fi
+done
+
+routeCount=#{nodeCount}
+for index in {0..#{masterCount - 1}}; do
+  if ! grep -q "#{masterBaseName}$(( #{masterBaseAddr} + ${index} ))" /etc/hosts; then
+    echo "#{natBaseAddrString}.$(( #{masterBaseAddr} + ${index} )).#{vagrantNatAddr} #{masterBaseName}$(( #{masterBaseAddr} + ${index} ))" >> /etc/hosts
+  fi
+  if ! ip route | grep "#{natBaseAddrString}.$(( #{masterBaseAddr} + ${index} )).0"; then
+    ip route add #{natBaseAddrString}.$(( #{masterBaseAddr} + ${index} )).0/24 via #{hostonlyBaseAddrString}.$(( #{masterBaseAddr} + ${index} )) dev eth1
+	cat >> #{routeEth1Path} <<INNER_HEREDOC
+ADDRESS$(( routeCount + index ))=#{natBaseAddrString}.$(( #{masterBaseAddr} + ${index} )).0
+NETMASK$(( routeCount + index ))=255.255.255.0
+GATEWAY$(( routeCount + index ))=#{hostonlyBaseAddrString}.$(( #{masterBaseAddr} + ${index} ))
+INNER_HEREDOC
   fi
 done
 
@@ -72,14 +118,18 @@ all_nodes
 master_nodes
 worker_nodes
 
-[master_nodes]
-node-0
-
-[worker_nodes]
 BASH_HEREDOC
 
-for index in {1..#{nodeCount - 1}}; do
-	echo "node-${index}" >> inventory
+
+echo "[master_nodes]" >> inventory
+for index in {0..#{masterCount - 1}}; do
+	echo "#{masterBaseName}$(( #{masterBaseAddr} + ${index} ))" >> inventory
+done
+
+echo >> inventory
+echo "[worker_nodes]" >> inventory
+for index in {0..#{nodeCount - 1}}; do
+	echo "#{nodeBaseName}$(( #{nodeBaseAddr} + ${index} ))" >> inventory
 done
 
 chown -R vagrant:vagrant inventory
@@ -88,9 +138,7 @@ chown -R vagrant:vagrant inventory
 # only vagrant user has public-keys setup
 sudo -u vagrant ansible-playbook --inventory=inventory playbook-init.yml
 
-# BEWARE: This will override kubernetes_kubelet_extra_args defined in ansible files.
-# kubeadm fails to start kubectl if swap enabled on master; but swap required for small memory machines in vagrant environment  
-sudo -u vagrant ansible-playbook --inventory=inventory --extra-vars "kubernetes_kubelet_extra_args='--fail-swap-on=false'" playbook-apply.yml 
+sudo -u vagrant ansible-playbook --inventory=inventory playbook-apply.yml 
 
 popd
 HEREDOC
@@ -141,14 +189,38 @@ Vagrant.configure("2") do |config|
     # BOX VERSION FROM HERE: https://app.vagrantup.com/centos/boxes/7
 	config.vm.box = vboxImage
     config.vm.box_version = vboxVersion
-	(0..nodeCount-1).each do |nodeIndex|
-      	config.vm.define "#{nodeBaseName}#{nodeIndex}" do |machine|
-			machine.vm.network :private_network, ip: "#{networkBaseAddrString}#{nodeBaseAddr + nodeIndex}"
-			machine.vm.hostname = "#{nodeBaseName}#{nodeIndex}"
+	(0..masterCount-1).each do |masterIndex|
+      	config.vm.define "#{masterBaseName}#{masterBaseAddr + masterIndex}" do |machine|
+			machine.vm.hostname = "#{masterBaseName}#{masterBaseAddr + masterIndex}"
+			machine.vm.network "private_network", ip: "#{hostonlyBaseAddrString}.#{masterBaseAddr + masterIndex}"
+			machine.ssh.port = #{sshBasePort + masterBaseAddr + masterIndex}
 			machine.vm.provider "#{vm_provider}" do |provider_vm|
-				provider_vm.name = "#{nodeBaseName}#{nodeIndex}"
+				provider_vm.name = "#{masterBaseName}#{masterBaseAddr + masterIndex}"
 				provider_vm.memory = 4096
 				provider_vm.cpus = 2
+				# Use the network address as a way of making a unique IP address on eth0; otherwise
+				# vagrant would make all nodes 10.0.2.15 which confuses kubeadm
+				provider_vm.customize ['modifyvm',:id, '--natnet1', "#{natBaseAddrString}.#{masterBaseAddr + masterIndex}.0/24"] 
+			end
+        	machine.vm.provision  "shell", inline: $setup_ssh_keys
+        	machine.vm.provision  "shell" do |bash_shell|
+			  bash_shell.inline = $setup_hosts
+			  # Kubernetes nodes don't like swap enabled.
+			  bash_shell.args = "disable_swap"
+			end
+		end
+	end
+	(0..nodeCount-1).each do |nodeIndex|
+      	config.vm.define "#{nodeBaseName}#{nodeBaseAddr + nodeIndex}" do |machine|
+			machine.vm.hostname = "#{nodeBaseName}#{nodeBaseAddr + nodeIndex}"
+			machine.vm.network "private_network", ip: "#{hostonlyBaseAddrString}.#{nodeBaseAddr + nodeIndex}"
+			machine.vm.provider "#{vm_provider}" do |provider_vm|
+				provider_vm.name = "#{nodeBaseName}#{nodeBaseAddr + nodeIndex}"
+				provider_vm.memory = 4096
+				provider_vm.cpus = 2
+				# Use the network address as a way of making a unique IP address on eth0; otherwise
+				# vagrant would make all nodes 10.0.2.15 which confuses kubeadm
+				provider_vm.customize ['modifyvm',:id, '--natnet1', "#{natBaseAddrString}.#{nodeBaseAddr + nodeIndex}.0/24"] 
 			end
         	machine.vm.provision  "shell", inline: $setup_ssh_keys
         	machine.vm.provision  "shell" do |bash_shell|
@@ -159,15 +231,19 @@ Vagrant.configure("2") do |config|
 		end
 	end
 	config.vm.define "#{devopsBaseName}" do |machine|
-		machine.vm.network :private_network, ip: "#{networkBaseAddrString}#{devopsBaseAddr}"
 		machine.vm.hostname = "#{devopsBaseName}"
+		machine.vm.network "private_network", ip: "#{hostonlyBaseAddrString}.#{devopsBaseAddr}"
 		machine.vm.provider "#{vm_provider}" do |provider_vm|
 			provider_vm.name = "#{devopsBaseName}"
 			provider_vm.memory = 4096
 			provider_vm.cpus = 4
+			# Use the network address as a way of making a unique IP address on eth0; otherwise
+			# vagrant would make all nodes 10.0.2.15
+			provider_vm.customize ['modifyvm',:id, '--natnet1', "#{natBaseAddrString}.#{devopsBaseAddr}.0/24"] 
 		end
     	machine.vm.provision  "shell", inline: $setup_ssh_keys
        	machine.vm.provision  "shell", inline: $setup_hosts
+		# now we have the infrastructure created, provision the kubernetes cluster using ansible playbook
     	machine.vm.provision  "shell", inline: $ansible_playbook
 	end
 end
