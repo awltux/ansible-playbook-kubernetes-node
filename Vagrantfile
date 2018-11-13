@@ -12,8 +12,11 @@ routeEth1Path = "/etc/sysconfig/network-scripts/route-eth1"
 
 sshBasePort = 2200
 # One DevOps
-devopsBaseAddr = 9
+devopsBaseAddr = 8
 devopsBaseName = "devops"
+
+zfsBaseAddr = 9
+zfsBaseName = "zfs-storage"
 
 # Up to 7 master_nodes
 masterCount = 1
@@ -51,6 +54,7 @@ set -e
 if [[ "$1" == "disable_swap" ]]; then
   # Kubernetes nodes don't like swap enabled.
   swapoff -a
+  sed -i "s/^.* swap .*$//" /etc/fstab
 fi
 
 touch #{routeEth1Path}
@@ -69,6 +73,19 @@ INNER_HEREDOC
 fi
 
 routeCount=1
+if ! grep -q "zfs-storage" /etc/hosts; then
+  echo "#{natBaseAddrString}.#{zfsBaseAddr}.#{vagrantNatAddr} zfs-storage" >> /etc/hosts
+fi
+if ! ip route | grep "#{natBaseAddrString}.#{zfsBaseAddr}.0"; then
+  ip route add #{natBaseAddrString}.#{zfsBaseAddr}.0/24 via #{hostonlyBaseAddrString}.#{zfsBaseAddr} dev eth1
+  cat > #{routeEth1Path} <<INNER_HEREDOC
+ADDRESS${routeCount}=#{natBaseAddrString}.#{zfsBaseAddr}.0
+NETMASK${routeCount}=255.255.255.0
+GATEWAY${routeCount}=#{hostonlyBaseAddrString}.#{zfsBaseAddr}
+INNER_HEREDOC
+fi
+
+routeCount=2
 for index in {0..#{nodeCount - 1}}; do
   if ! grep -q "#{nodeBaseName}$(( #{nodeBaseAddr} + ${index} ))" /etc/hosts; then
     echo "#{natBaseAddrString}.$(( #{nodeBaseAddr} + ${index} )).#{vagrantNatAddr} #{nodeBaseName}$(( #{nodeBaseAddr} + ${index} ))" >> /etc/hosts
@@ -109,6 +126,9 @@ pushd /vagrant/ansible
 cat > inventory <<BASH_HEREDOC
 [provisioner]
 devops
+
+[storage]
+zfs-storage
 
 [all:children]
 provisioner
@@ -229,6 +249,22 @@ Vagrant.configure("2") do |config|
 			  bash_shell.args = "disable_swap"
 			end
 		end
+	end
+	config.vm.define "#{zfsBaseName}" do |machine|
+		machine.vm.hostname = "#{zfsBaseName}"
+		machine.vm.network "private_network", ip: "#{hostonlyBaseAddrString}.#{zfsBaseAddr}"
+		machine.vm.provider "#{vm_provider}" do |provider_vm|
+			provider_vm.name = "#{zfsBaseName}"
+			provider_vm.memory = 4096
+			provider_vm.cpus = 4
+			# Use the network address as a way of making a unique IP address on eth0; otherwise
+			# vagrant would make all nodes 10.0.2.15
+			provider_vm.customize ['modifyvm',:id, '--natnet1', "#{natBaseAddrString}.#{zfsBaseAddr}.0/24"] 
+		end
+    	machine.vm.provision  "shell", inline: $setup_ssh_keys
+       	machine.vm.provision  "shell", inline: $setup_hosts
+		# now we have the infrastructure created, provision the kubernetes cluster using ansible playbook
+    	machine.vm.provision  "shell", inline: $ansible_playbook
 	end
 	config.vm.define "#{devopsBaseName}" do |machine|
 		machine.vm.hostname = "#{devopsBaseName}"

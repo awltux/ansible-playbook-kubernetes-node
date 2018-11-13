@@ -23,7 +23,12 @@
           git_version: 'b387a4482b2dac2640a72c512e4f232c95dc166c' }
 
     - { role: clone-ansible-role-from-git, 
-          git_account: 'geerlingguy', 
+          git_account: 'awltux', 
           git_project: 'ansible-role-kubernetes', 
           git_version: '5c4eea46ed3cc7fc9a2e3ddb2fef11e1b2fdb773' }
+
+    - { role: clone-ansible-role-from-git, 
+          git_account: 'gabethecabbage', 
+          git_project: 'ansible-role-zfs', 
+          git_version: '1dee2f5d8d50196af8a1abf27f6de83bf53e1b18' }
 

@@ -3,7 +3,8 @@
 - name: Configure for Kubernetes container orchestration
   when: container_manager == 'kubernetes'
   block:
-    - name: Load kernel modules to support IPVS and bridge-netfilter     
+    - name: Load kernel modules to support IPVS and bridge-netfilter
+      # INFO: https://kubernetes.io/docs/concepts/services-networking/service/#proxy-mode-ipvs
       modprobe: 
         name: '{{ item }}'
         state: present
@@ -15,6 +16,7 @@
         - br_netfilter
 
     - name: "[Support kubeadm.pre-flight-checks]: Persist loading of kernel modules to support IPVS and bridge-netfilter"
+      # INFO: https://kubernetes.io/docs/concepts/services-networking/service/#proxy-mode-ipvs
       blockinfile:
         path: /etc/modules-load.d/kubernetes.conf
         create: yes

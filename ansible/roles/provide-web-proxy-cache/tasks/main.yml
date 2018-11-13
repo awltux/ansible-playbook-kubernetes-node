@@ -5,6 +5,13 @@
     name: python-docker-py
     state: present
 
+- name: Create dir for squid cache and conigure SELinux
+  file:
+    path: /srv/docker/squid
+    state: directory
+    setype: svirt_sandbox_file_t
+    recurse: true
+    
 - name: Start a squid container
   docker_container:
     name: squid

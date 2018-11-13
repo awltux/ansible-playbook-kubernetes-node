@@ -5,13 +5,29 @@
 - hosts: provisioner
   become: true
   roles:
+    - { role: provide-container-engine } 
+#    - { role: provide-web-proxy-cache }
+  vars_files:
+    - vars/ansible-role-docker-ce.yml 
+
+- hosts: provisioner
+  become: true
+  roles:
     - { role: ansible-role-sudo }
     - { role: ansible-hardening }
-    - { role: provide-container-engine } 
+  vars_files:
+    - vars/ansible-role-sudo.yml
+    - vars/ansible-hardening.yml
+
+- hosts: storage
+  become: true
+  roles:
+    - { role: ansible-role-sudo }
+    - { role: ansible-hardening }
+    - { role: provide-shared-file-system }
   vars_files:
     - vars/ansible-role-sudo.yml 
     - vars/ansible-hardening.yml 
-    - vars/ansible-role-docker-ce.yml 
 
 - hosts: all_nodes
   become: true
@@ -23,11 +39,6 @@
     - vars/ansible-role-sudo.yml 
     - vars/ansible-hardening.yml 
     - vars/ansible-role-docker-ce.yml 
-
-#- hosts: provisioner
-#  become: true
-#  roles:
-#    - { role: provide-web-proxy-cache }
 
 # Should be able to use master_nodes:worker_nodes, but playbook doesn't load the two different group_vars correctly
 - hosts: master_nodes

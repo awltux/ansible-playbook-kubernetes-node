@@ -1,3 +1,2 @@
 ---
 kubernetes_role: 'master'
-kubernetes_overlay_network: 'flannel'
