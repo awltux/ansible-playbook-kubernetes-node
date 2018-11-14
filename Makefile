@@ -16,7 +16,7 @@ vagrant-destroy-k8s:
 	# preserve the devops server and it's squid cache
 	for i in `vagrant global-status | grep virtualbox | grep -v ' devops ' | awk '{ print $$1 }'` ; do vagrant destroy -f $$i ; done
 
-vagrant-provision:
+vagrant-reload-devops:
 	vagrant reload --provision devops
 
 vagrant-reload:

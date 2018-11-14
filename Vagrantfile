@@ -263,8 +263,6 @@ Vagrant.configure("2") do |config|
 		end
     	machine.vm.provision  "shell", inline: $setup_ssh_keys
        	machine.vm.provision  "shell", inline: $setup_hosts
-		# now we have the infrastructure created, provision the kubernetes cluster using ansible playbook
-    	machine.vm.provision  "shell", inline: $ansible_playbook
 	end
 	config.vm.define "#{devopsBaseName}" do |machine|
 		machine.vm.hostname = "#{devopsBaseName}"

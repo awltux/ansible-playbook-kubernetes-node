@@ -6,9 +6,16 @@
   become: true
   roles:
     - { role: provide-container-engine } 
-#    - { role: provide-web-proxy-cache }
+    - { role: provide-web-proxy-cache }
   vars_files:
     - vars/ansible-role-docker-ce.yml 
+
+- hosts: all
+  become: true
+  roles:
+    # TODO: Need to exclude docker-registry service using no_proxy_hosts
+    # TODO: Need to add docker client to role
+    - { role: provide-web-proxy-client, proxy_host: 'devops', no_proxy_hosts: '' }
 
 - hosts: provisioner
   become: true

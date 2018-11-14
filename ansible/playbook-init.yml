@@ -32,3 +32,8 @@
           git_project: 'ansible-role-zfs', 
           git_version: '1dee2f5d8d50196af8a1abf27f6de83bf53e1b18' }
 
+    - { role: clone-ansible-role-from-git, 
+          git_account: 'awltux', 
+          git_project: 'ansible-role-proxy_settings', 
+          git_version: 'master' }
+

@@ -1,0 +1,11 @@
+---
+- name: Configure web proxy clients 
+  block:
+    - name: Include role ansible-role-proxy_settings
+      include_role: 
+        name: ansible-role-proxy_settings
+      vars:
+        proxy_settings_http_proxy: 'http://{{ proxy_host }}:3128'
+        proxy_settings_https_proxy: 'http://{{ proxy_host }}:3128'
+        proxy_settings_yum_proxy: 'http://{{ proxy_host }}:3128'
+        proxy_settings_no_proxy: '{{ no_proxy_hosts }}'
