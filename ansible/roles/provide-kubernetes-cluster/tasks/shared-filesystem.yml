@@ -1,0 +1,9 @@
+---
+- name: Install and configure zfs server
+  when: storage_type == 'zfs'
+  block:
+    - name: Include role ansible-role-zfs
+      include_role: 
+        name: ansible-role-zfs
+
+        

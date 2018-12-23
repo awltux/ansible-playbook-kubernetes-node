@@ -1,6 +1,7 @@
 ---
 # Provide overrides for defaults found here:
 #    https://github.com/openstack/ansible-hardening/blob/master/defaults/main.yml
+ansible_hardening_enabled: false
 
 security_rhel7_initialize_aide: yes
 
@@ -12,3 +13,6 @@ security_enable_pwquality_password_set: yes
 
 security_rhel7_concurrent_session_limit: 10
 
+# Disable console TMOUT as its interferres with ansible runs.
+# Turn it back on at end of install.
+security_rhel7_session_timeout: 0

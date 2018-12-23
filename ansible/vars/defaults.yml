@@ -1,3 +1,4 @@
 ---
 
 container_provider: 'docker'
+proxy_cache_enabled: false

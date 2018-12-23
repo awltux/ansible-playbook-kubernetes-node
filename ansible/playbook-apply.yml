@@ -6,45 +6,42 @@
   become: true
   roles:
     - { role: provide-container-engine } 
-    - { role: provide-web-proxy-cache }
+    - { role: provide-web-proxy-cache, when: proxy_cache_enabled }
   vars_files:
     - vars/ansible-role-docker-ce.yml 
+    - vars/defaults.yml 
 
 - hosts: all
   become: true
   roles:
     # TODO: Need to exclude docker-registry service using no_proxy_hosts
     # TODO: Need to add docker client to role
-    - { role: provide-web-proxy-client, proxy_host: 'devops', no_proxy_hosts: '' }
+    - { role: provide-web-proxy-client, proxy_host: 'devops', no_proxy_hosts: '', when: proxy_cache_enabled }
+  vars_files:
+    - vars/defaults.yml 
 
 - hosts: provisioner
   become: true
   roles:
     - { role: ansible-role-sudo }
-    - { role: ansible-hardening }
   vars_files:
     - vars/ansible-role-sudo.yml
-    - vars/ansible-hardening.yml
 
 - hosts: storage
   become: true
   roles:
     - { role: ansible-role-sudo }
-    - { role: ansible-hardening }
     - { role: provide-shared-file-system }
   vars_files:
     - vars/ansible-role-sudo.yml 
-    - vars/ansible-hardening.yml 
 
 - hosts: all_nodes
   become: true
   roles:
     - { role: ansible-role-sudo }
-    - { role: ansible-hardening }
     - { role: provide-container-engine } 
   vars_files:
     - vars/ansible-role-sudo.yml 
-    - vars/ansible-hardening.yml 
     - vars/ansible-role-docker-ce.yml 
 
 # Should be able to use master_nodes:worker_nodes, but playbook doesn't load the two different group_vars correctly
@@ -62,5 +59,12 @@
     - role: provide-container-orchestration 
     - role: provide-container-network-overlay 
   vars_files:
-    - vars/ansible-role-kubernetes.yml 
+    - vars/ansible-role-kubernetes.yml
+    
+- hosts: all
+  become: true
+  roles:
+    - { role: ansible-hardening, when: ansible_hardening_enabled }
+  vars_files:
+    - vars/ansible-hardening.yml 
         

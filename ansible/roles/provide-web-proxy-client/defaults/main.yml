@@ -1,0 +1,5 @@
+---
+
+proxy_host: devops
+yum_clean_cache: true
+proxy_cache_enabled: false
