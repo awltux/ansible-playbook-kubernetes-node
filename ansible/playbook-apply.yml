@@ -8,7 +8,7 @@
     - { role: provide-container-engine } 
     - { role: provide-web-proxy-cache, when: proxy_cache_enabled }
   vars_files:
-    - vars/ansible-role-docker-ce.yml 
+    - vars/ansible-role-docker-ce.yml
     - vars/defaults.yml 
 
 - hosts: all

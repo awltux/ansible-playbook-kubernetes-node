@@ -1,4 +1,21 @@
 ---
 
+# ansible\roles\provide-container-engine
 container_engine: 'docker'
+
+# ansible\roles\provide-shared-file-system
+storage_type: 'zfs'
+zfs_dkms_el_enabled: 1
+zfs_kmod_el_enabled: 0
+
+# ansible\roles\provide-container-orchestration
+container_manager: 'kubernetes'
+kubernetes_role: 'none'
+kubernetes_overlay_network: 'flannel'
+kubernetes_kubelet_extra_args: "--node-ip={{ ansible_host }}"
+
+# ansible\roles\provide-web-proxy-client
+proxy_host: devops
+yum_clean_cache: true
+proxy_cache_enabled: false
 
