@@ -1,4 +1,0 @@
----
-storage_type: 'zfs'
-zfs_dkms_el_enabled: 1
-zfs_kmod_el_enabled: 0

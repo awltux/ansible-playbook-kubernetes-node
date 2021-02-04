@@ -47,9 +47,7 @@ else
 end
 
 $setup_hosts = <<-HEREDOC
-#!/bin/bash
-
-set -e
+#!/bin/bash -eu
 
 if [[ "$1" == "disable_swap" ]]; then
   # Kubernetes nodes don't like swap enabled.

@@ -24,6 +24,10 @@ vagrant-destroy-devops:
 vagrant-destroy-all:
 	for i in `vagrant global-status | grep virtualbox | awk '{ print $$1 }'` ; do vagrant destroy -f $$i ; done
 
+vagrant-destroy:
+	# preserve the devops server and it's squid cache
+	for i in `vagrant global-status | grep virtualbox | grep -v ' devops ' | awk '{ print $$1 }'` ; do vagrant destroy -f $$i ; done
+
 vagrant-reload:
 	vagrant reload --provision devops
 

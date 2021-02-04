@@ -1,0 +1,6 @@
+[submodule "ansible/roles/ansible-role.reverse-proxy"]
+	path = ansible/roles/ansible-role.reverse-proxy
+	url = https://mercurial1.local.tmvse.com/scm/git/ansible-role.reverse-proxy
+[submodule "ansible/roles/ansible-role.zfs"]
+	path = ansible/roles/ansible-role.zfs
+	url = https://mercurial1.local.tmvse.com/scm/git/ansible-role.zfs
